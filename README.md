@@ -694,47 +694,122 @@ QuestNeta = function()
   }
 end
 
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local Window = Fluent:CreateWindow({Title = "❤️Itachi hub❤️",SubTitle = "| By:Itachi ",TabWidth = 180,Size = UDim2.fromOffset(660, 440),Acrylic = false,Theme = "Rose",MinimizeKey = Enum.KeyCode.End})
-	
--- Services
+-- ===================================================== --
+-- INTERFACE ITACHI HUB - TEMA PRETO E VERMELHO
+-- ===================================================== --
+
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/download/latest/main.lua"))()
+local Window = Fluent:CreateWindow({
+    Title = "🍥 ITACHI HUB | Sharingan Mode 🍥", 
+    SubTitle = "| By: caveira | Tema: Itachi Uchiha",
+    TabWidth = 180,
+    Size = UDim2.fromOffset(660, 440),
+    Acrylic = false,
+    Theme = "Rose",
+    MinimizeKey = Enum.KeyCode.End
+})
+
+pcall(function()
+    Window:SetTheme("Dark")
+end)
+
+-- Estilo CSS para bordas vermelhas e fundo preto
+local StyleSheet = Instance.new("StyleSheet")
+StyleSheet.Source = [[
+    .Frame, .TabFrame, .Tab, .TabContainer, .Window, .Main, .Content, .Left {
+        background-color: #0a0a0a !important;
+        border-color: #ff0000 !important;
+    }
+    .Window {
+        border: 2px solid #ff0000 !important;
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.3) !important;
+    }
+    .Tab.Active {
+        background-color: #2a0000 !important;
+        border-left: 3px solid #ff0000 !important;
+    }
+    .Tab .Text {
+        color: #cccccc !important;
+    }
+    .Tab.Active .Text {
+        color: #ff4d4d !important;
+        text-shadow: 0 0 5px rgba(255, 0, 0, 0.5) !important;
+    }
+    .Toggle, .Button, .Dropdown, .Slider, .Input {
+        border: 1px solid #660000 !important;
+        background-color: #111111 !important;
+    }
+    .Toggle.Active {
+        background-color: #990000 !important;
+        border-color: #ff0000 !important;
+    }
+    .Button:hover {
+        background-color: #2a0000 !important;
+        border-color: #ff3333 !important;
+    }
+    .Paragraph .Title, .Paragraph .Content {
+        color: #cccccc !important;
+    }
+]]
+StyleSheet.Parent = game:GetService("CoreGui")
+
+-- Ícone flutuante do Itachi (canto inferior direito, tamanho médio, borda fina)
 local CoreGui = game:GetService("CoreGui")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local UserInputService = game:GetService("UserInputService")
+local ItachiIconGui = Instance.new("ScreenGui")
+ItachiIconGui.Name = "ItachiHubIcon"
+ItachiIconGui.Parent = CoreGui
+ItachiIconGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ItachiIconGui.ResetOnSpawn = false
 
--- ScreenGui
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ControlButtonGUI"
-ScreenGui.Parent = CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local ItachiButton = Instance.new("ImageButton")
+ItachiButton.Size = UDim2.new(0, 60, 0, 60)
+ItachiButton.Position = UDim2.new(0.85, 0, 0.80, 0)
+ItachiButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ItachiButton.BackgroundTransparency = 0.2
+ItachiButton.Image = "rbxassetid://130364232574601"
+ItachiButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
+ItachiButton.Parent = ItachiIconGui
 
--- ImageButton
-local ToggleButton = Instance.new("ImageButton")
-ToggleButton.Size = UDim2.new(0, 50, 0, 50)
-ToggleButton.Position = UDim2.new(0.15, 0, 0.15, 0)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.BorderSizePixel = 0
-ToggleButton.Image = "rbxassetid://189484710" -- sua imagem
-ToggleButton.Parent = ScreenGui
+-- Borda arredondada e linha vermelha fina
+local corners = Instance.new("UICorner")
+corners.CornerRadius = UDim.new(1, 0)
+corners.Parent = ItachiButton
 
--- UICorner para bordas arredondadas
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(1, 0)
-Corner.Parent = ToggleButton
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.Thickness = 2
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = ItachiButton
+
+-- Efeito hover
+local hoverTween = game:GetService("TweenService")
+local glowIn = hoverTween:Create(ItachiButton, TweenInfo.new(0.2), {
+    ImageColor3 = Color3.fromRGB(255, 100, 100),
+    BackgroundTransparency = 0
+})
+local glowOut = hoverTween:Create(ItachiButton, TweenInfo.new(0.2), {
+    ImageColor3 = Color3.fromRGB(255, 255, 255),
+    BackgroundTransparency = 0.2
+})
+ItachiButton.MouseEnter:Connect(function() glowIn:Play() end)
+ItachiButton.MouseLeave:Connect(function() glowOut:Play() end)
 
 -- Clique envia tecla End
-ToggleButton.MouseButton1Click:Connect(function()
+ItachiButton.MouseButton1Click:Connect(function()
+    local VirtualInputManager = game:GetService("VirtualInputManager")
     VirtualInputManager:SendKeyEvent(true, "End", false, game)
+    task.wait(0.05)
     VirtualInputManager:SendKeyEvent(false, "End", false, game)
 end)
 
--- Arrasto funcional
+-- Arrastar ícone
 local dragging = false
 local dragInput, dragStart, startPos
+local UserInputService = game:GetService("UserInputService")
 
 local function update(input)
     local delta = input.Position - dragStart
-    ToggleButton.Position = UDim2.new(
+    ItachiButton.Position = UDim2.new(
         startPos.X.Scale,
         startPos.X.Offset + delta.X,
         startPos.Y.Scale,
@@ -742,12 +817,11 @@ local function update(input)
     )
 end
 
-ToggleButton.InputBegan:Connect(function(input)
+ItachiButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
-        startPos = ToggleButton.Position
-
+        startPos = ItachiButton.Position
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
@@ -756,7 +830,7 @@ ToggleButton.InputBegan:Connect(function(input)
     end
 end)
 
-ToggleButton.InputChanged:Connect(function(input)
+ItachiButton.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         dragInput = input
     end
@@ -768,24 +842,31 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
+print("Itachi Hub carregado com sucesso! Tema: Sharingan Mode")
+
+-- ===================================================== --
+-- TABELA DE ABAS
+-- ===================================================== --
+
 local Tabs = {
-  Settings = Window:AddTab({Title = "⚙️Setting Farm", Icon = ""}),
-  Main = Window:AddTab({Title = "🚀Farm", Icon = ""}),
-  Melee = Window:AddTab({Title = "🥊Fighting Style", Icon = ""}),
-  Quests = Window:AddTab({Title = "💎Items Farm", Icon = ""}),
-  Valentine = Window:AddTab({Title = "❤️Valentine", Icon = ""}),
-  SeaEvent = Window:AddTab({Title = "🌊Sea Events", Icon = ""}),
-  Mirage = Window:AddTab({Title = "🌴Mirage + RaceV4", Icon = ""}),
-  Drago = Window:AddTab({Title = "🐉Drago Dojo", Icon = ""}),
-  Prehistoric = Window:AddTab({Title = "🦕Prehistoric", Icon = ""}),
-  Raids = Window:AddTab({Title = "🌀Raid", Icon = ""}),
-  Combat = Window:AddTab({Title = "⚔️Combat PVP", Icon = ""}),
-  Travel = Window:AddTab({Title = "🗺️Travel", Icon = ""}),
-  Fruit = Window:AddTab({Title = "🍎Fruits", Icon = ""}),
-  Shop = Window:AddTab({Title = "🛒Shop", Icon = ""}),
-  Misc = Window:AddTab({Title = "⚡Misc", Icon = ""})
+  Settings = Window:AddTab({Title = "⚙️ Setting Farm", Icon = ""}),
+  Main = Window:AddTab({Title = "🚀 Farm", Icon = ""}),
+  Melee = Window:AddTab({Title = "🥊 Fighting Style", Icon = ""}),
+  Quests = Window:AddTab({Title = "💎 Items Farm", Icon = ""}),
+  Valentine = Window:AddTab({Title = "❤️ Valentine", Icon = ""}),
+  SeaEvent = Window:AddTab({Title = "🌊 Sea Events", Icon = ""}),
+  Mirage = Window:AddTab({Title = "🌴 Mirage + Race V4", Icon = ""}),
+  Drago = Window:AddTab({Title = "🐉 Drago Dojo", Icon = ""}),
+  Prehistoric = Window:AddTab({Title = "🦕 Prehistoric", Icon = ""}),
+  Raids = Window:AddTab({Title = "🌀 Raid", Icon = ""}),
+  Combat = Window:AddTab({Title = "⚔️ Combat PVP", Icon = ""}),
+  Travel = Window:AddTab({Title = "🗺️ Travel", Icon = ""}),
+  Fruit = Window:AddTab({Title = "🍎 Fruits", Icon = ""}),
+  Shop = Window:AddTab({Title = "🛒 Shop", Icon = ""}),
+  Misc = Window:AddTab({Title = "⚡ Misc", Icon = ""})
 }
- 
+
+
 local FarmLevel = Tabs.Main:AddToggle("FarmLevel", {Title = "Auto Farm Level", Description = "", Default = false})
 FarmLevel:OnChanged(function(Value)
   _G.Level = Value
@@ -6986,4 +7067,4 @@ task.spawn(function()
     end)
   end)
 end)
-Window:SelectTab(1)Tab(1)
+Window:SelectTab(1)
